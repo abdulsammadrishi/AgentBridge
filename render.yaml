@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: agentbridge-demo
+    runtime: node
+    plan: starter
+    buildCommand: npm run check
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PUBLIC_BASE_URL
+        sync: false
+      - key: API_BASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: AGENTBRIDGE_DATA_DIR
+        value: /var/data
+      - key: DEMO_RESET_ENABLED
+        value: "false"
+      - key: WEBMCP_ORIGIN_TRIAL_TOKEN
+        sync: false
+    disk:
+      name: agentbridge-data
+      mountPath: /var/data
+      sizeGB: 1

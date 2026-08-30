@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0c1017" />
+    <!-- Local demo: replace this value with the token shown by AgentBridge. -->
+    <meta name="agentbridge-verification" content="REPLACE_WITH_AGENTBRIDGE_TOKEN" />
+    <meta name="agentbridge-api-base" content="http://localhost:3000" />
+    <title>Northstar Supply — Everyday essentials, ready to go</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="agentbridge.css" />
+    <link rel="stylesheet" href="confirmation.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Northstar Supply home"><span class="brand-mark">N</span> NORTHSTAR</a>
+      <nav aria-label="Main navigation"><a href="#shop">Shop</a><a href="#why-us">Our standard</a></nav>
+      <button class="cart-button" id="cart-button" aria-controls="cart-drawer" aria-expanded="false">Bag <span id="cart-count">0</span></button>
+    </header>
+
+    <main id="top">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy"><p class="eyebrow">Built for the everyday move</p><h1 id="hero-title">Good gear.<br /><em>Better days.</em></h1><p>Thoughtful essentials for every commute, sprint, and spontaneous weekend away.</p><a class="button button-dark" href="#shop">Shop the collection <span>→</span></a></div>
+        <div class="hero-art" aria-hidden="true"><div class="sun"></div><div class="hero-shoe"><span></span><span></span><span></span></div><p>MOVE<br />WITH<br />INTENT</p></div>
+      </section>
+
+      <section class="bridge-console" id="bridge-console" aria-labelledby="bridge-title">
+        <div class="bridge-console-header">
+          <div><p class="eyebrow">Merchant controls</p><h2 id="bridge-title">AgentBridge</h2><p>Set the exact capabilities AI agents can use on this storefront.</p></div>
+          <div class="master-control"><span>Agent Access</span><label class="master-switch"><input id="master-switch" type="checkbox" aria-label="Toggle Agent Access" /><i></i></label><strong id="master-state"></strong></div>
+        </div>
+        <div class="bridge-grid">
+          <section class="bridge-card permissions"><h3>Tool permissions</h3><p class="card-intro">Green capabilities are available to agents.</p><div id="permission-list"></div></section>
+          <section class="bridge-card status"><h3>Tool status</h3><ul id="tool-status-list"></ul></section>
+          <section class="bridge-card agent-view"><p class="eyebrow">WebMCP Agent View</p><h3>Currently exposed to agents</h3><ul id="agent-tools"></ul></section>
+          <section class="bridge-card activity"><h3>Activity log</h3><ul id="activity-log"></ul></section>
+        </div>
+      </section>
+
+      <section class="shop-section" id="shop" aria-labelledby="shop-title">
+        <div class="section-heading"><div><p class="eyebrow">The collection</p><h2 id="shop-title">Find your next favorite.</h2></div><label class="search"><span>⌕</span><input id="search-input" type="search" placeholder="Search products" autocomplete="off" /></label></div>
+        <div class="filter-row"><button class="filter active" data-filter="all">All products</button><button class="filter" data-filter="footwear">Footwear</button><button class="filter" data-filter="apparel">Apparel</button><button class="filter" data-filter="accessories">Accessories</button></div>
+        <div class="product-grid" id="product-grid" aria-live="polite"></div>
+        <p class="empty-state" id="empty-state" hidden>No products match that search.</p>
+      </section>
+
+      <section id="why-us" class="standard"><p class="eyebrow">Our standard</p><div><h2>Made for real life.</h2><p>Functional favorites, pared back to what matters: quality materials, useful details, and a little more room to move.</p></div><div class="standard-points"><p><b>01</b> Built to be used</p><p><b>02</b> Designed to last</p><p><b>03</b> Shipped with care</p></div></section>
+    </main>
+
+    <aside class="agentbridge-panel" aria-label="AgentBridge status"><div class="agentbridge-heading"><span class="pulse"></span><div><strong>AgentBridge</strong><small id="webmcp-status">WebMCP: CHECKING…</small></div></div><p>Registered agent tools</p><ul id="tool-list"><li>Loading tools…</li></ul></aside>
+
+    <aside class="cart-drawer" id="cart-drawer" aria-label="Shopping bag" aria-hidden="true"><div class="drawer-header"><h2>Your bag</h2><button class="icon-button" id="close-cart" aria-label="Close cart">×</button></div><div id="cart-items" class="cart-items"></div><div class="cart-summary"><div><span>Subtotal</span><strong id="cart-total">$0.00</strong></div><p>Shipping and taxes calculated at checkout.</p><button class="button button-dark checkout" id="checkout-button">Checkout <span>→</span></button></div></aside>
+    <div class="scrim" id="scrim"></div>
+
+    <dialog id="product-dialog"><button class="icon-button dialog-close" id="close-dialog" aria-label="Close product details">×</button><div id="product-details"></div></dialog>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <section class="agentbridge-confirmation" id="agentbridge-confirmation" hidden><p class="eyebrow">Customer confirmation</p><h2>Add item to bag?</h2><p id="confirmation-summary"></p><button data-confirm>Confirm</button><button class="cancel" data-cancel>Cancel</button></section>
+
+    <script src="app.js"></script>
+    <script src="/agentbridge-config.js"></script>
+    <script src="webmcp.js"></script>
+    <script src="agentbridge.js"></script>
+  </body>
+</html>

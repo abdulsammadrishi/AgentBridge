@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.*
+!.env.example
+server/data/websites.json
+*.log
+coverage/
+.DS_Store
+Thumbs.db

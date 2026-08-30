@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentBridge — Agent-ready websites</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="analyzer.css" />
+    <link rel="stylesheet" href="journey.css" />
+</head>
+<body>
+  <header><a class="brand" href="/">AGENT<span>BRIDGE</span></a><span class="header-status"><i></i> Merchant console</span></header>
+  <main id="app"></main>
+  <template id="landing-template">
+    <section class="landing"><div class="hero-copy"><p class="eyebrow">The control plane for agent-ready sites</p><h1>Make your website<br><em>ready for AI agents.</em></h1><p>Give AI agents a structured, permission-controlled way to interact with your existing website.</p><button class="primary" data-action="start">Make my website agent-ready <b>→</b></button><div class="trust-row"><span>✓ Merchant-controlled</span><span>✓ WebMCP-ready</span><span>✓ No code required to start</span></div></div><div class="hero-panel"><div class="signal"><i></i><span>AGENT ACCESS</span><strong>ON</strong></div><div class="mini-site"><small>your-store.com</small><p>Capabilities available to agents</p><ul><li>✓ Search products</li><li>✓ Product details</li><li>✓ Check inventory</li><li class="muted">— Add to cart</li></ul></div><p class="panel-caption">Clear permissions.<br>Confidence by default.</p></div></section>
+  </template>
+  <template id="register-template">
+    <section class="flow"><div class="flow-progress"><span class="active">01 Your website</span><span>02 Verify</span><span>03 Go live</span></div><div class="form-card"><p class="eyebrow">Step 1 of 3</p><h1>Tell us about your website.</h1><p class="subtle">We’ll create a protected AgentBridge workspace for this site.</p><form id="website-form"><label>Website URL<input name="url" type="url" placeholder="https://demo-store.example" required></label><label>Business name<input name="businessName" type="text" placeholder="Northstar Supply" required></label><label>Business type<select name="businessType" required><option value="E-commerce">E-commerce</option><option value="Restaurant">Restaurant</option><option value="Services">Services</option><option value="Other">Other</option></select></label><p class="form-error" id="form-error"></p><button class="primary" type="submit">Continue to verification <b>→</b></button></form></div></section>
+  </template>
+  <template id="verify-template">
+    <section class="flow"><div class="flow-progress"><span class="done">01 Your website</span><span class="active">02 Verify</span><span>03 Go live</span></div><div class="verify-card"><p class="eyebrow">Website ownership</p><h1>Verify that you control this website.</h1><p>Add this tag inside the <code>&lt;head&gt;</code> of <b data-site-host></b>, then check verification.</p><div class="code-box"><code id="verification-tag"></code><button data-action="copy-token">Copy</button></div><div class="notice"><b>Local demo tip</b><span>For the included demo-store, replace the content value in its AgentBridge verification meta tag with this token, then refresh the demo site.</span></div><p class="form-error" id="verify-error"></p><button class="primary" data-action="verify">Check verification <b>→</b></button><button class="text-button" data-action="back-register">Back</button></div></section>
+  </template>
+  <template id="extension-template">
+    <section class="extension-card"><div class="extension-icon">AB</div><div><p class="eyebrow">Final connection</p><h2>Install AgentBridge</h2><p>The AgentBridge Chrome Extension connects your merchant controls to your website and lets you turn agent access on or off.</p></div><a class="secondary" href="#extension-placeholder">Install AgentBridge Extension <b>→</b></a></section>
+  </template>
+  <script src="app.js"></script>
+</body>
+</html>

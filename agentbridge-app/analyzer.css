@@ -1,0 +1,6 @@
+.readiness { display:inline-block; padding:3px 5px; font:9px 'DM Mono'; }
+.readiness.adapter_available { color:#527000; background:#ebf7a5; }
+.readiness.configuration_required { color:#805400; background:#ffedc9; }
+.readiness.unsupported { color:#717783; background:#e8e9e1; }
+.capability-list small + small { margin-top:4px; max-width:620px; line-height:1.45; }
+.adapter-button { margin-top:8px; border:1px solid #12161d; background:#fff; padding:6px 8px; font:800 10px Manrope; cursor:pointer; }
