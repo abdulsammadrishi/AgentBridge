@@ -1,4 +1,4 @@
-// Local default. Before loading the extension against a deployed demo, replace
-// this with that HTTPS API origin (for example, https://agentbridge.example).
-// Keep this file free of credentials and do not commit a deployment-specific copy.
-const AGENTBRIDGE_API_BASE = 'http://localhost:3000';
+// Production default. For local development, temporarily change only this value
+// to http://localhost:3000; localhost permissions remain in the manifest.
+// Keep this file free of credentials.
+const AGENTBRIDGE_API_BASE = 'https://agentbridge-production-dce4.up.railway.app';

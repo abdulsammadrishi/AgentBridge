@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentBridge Admin</title>
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body>
+  <main class="shell">
+    <header><p class="eyebrow">Internal AgentBridge Controller — Demo</p><h1>Connected websites</h1><p class="muted">Operator view of the existing AgentBridge website records.</p></header>
+    <section class="scanner" aria-labelledby="scanner-title">
+      <div><p class="eyebrow">WebMCP Scanner</p><h2 id="scanner-title">Open a page, then scan it with the extension.</h2></div>
+      <form id="scanner-form"><label>Website URL<input id="scanner-url" type="url" required placeholder="https://example.com" /></label><button>Open &amp; Scan</button></form>
+      <p id="scanner-help" class="muted">The page opens in a new tab. Click the AgentBridge extension there, choose “Scan WebMCP Tools,” then return here.</p>
+      <section id="scanner-result" class="result" hidden aria-live="polite"></section>
+    </section>
+    <section class="records"><div class="section-heading"><div><p class="eyebrow">Website records</p><h2>All connected websites</h2></div><button id="refresh" class="secondary">Refresh</button></div><p id="table-status" class="muted">Loading records…</p><div class="table-wrap"><table><thead><tr><th>Domain / URL</th><th>Business type</th><th>Verified</th><th>Agent Access</th><th>Capabilities / approved tools</th><th>Created</th><th>Last updated</th></tr></thead><tbody id="websites"></tbody></table></div></section>
+  </main>
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -16,8 +16,9 @@
     root.replaceChildren(getTemplate('#landing-template'));
     root.querySelector('[data-action="start"]').addEventListener('click', register);
   }
-  function register() {
+  function register(prefillUrl = '') {
     root.replaceChildren(getTemplate('#register-template'));
+    root.querySelector('[name="url"]').value = prefillUrl;
     root.querySelector('#website-form').addEventListener('submit', async event => {
       event.preventDefault();
       const form = new FormData(event.currentTarget), error = root.querySelector('#form-error');
@@ -84,6 +85,23 @@
   async function testAdapter(capabilityId) { try { const result = await api('/api/websites/' + state.website.id + '/capabilities/' + capabilityId + '/adapter/test', { method: 'POST' }); storeCurrent(result.website); alert('Adapter test passed: ' + JSON.stringify(result.result)); dashboard(); } catch (err) { alert(err.message); } }
   function escapeHtml(value) { return String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]); }
   async function boot() {
+    const params = new URLSearchParams(location.search), onboardingUrl = params.get('onboardUrl');
+    const normalizeOnboardingUrl = value => {
+      try {
+        const url = new URL(value);
+        if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Unsupported protocol');
+        return url.origin;
+      } catch { return ''; }
+    };
+    if (params.get('freshOnboarding') === '1') {
+      history.replaceState(null, '', location.pathname);
+      return register(normalizeOnboardingUrl(onboardingUrl));
+    }
+    if (onboardingUrl) {
+      const normalized = normalizeOnboardingUrl(onboardingUrl);
+      history.replaceState(null, '', location.pathname);
+      if (normalized) return register(normalized);
+    }
     const id = localStorage.getItem('agentbridge-current-site');
     if (!id) return landing();
     try { storeCurrent(await api('/api/websites/' + id)); state.website.verified ? dashboard() : verify(); }

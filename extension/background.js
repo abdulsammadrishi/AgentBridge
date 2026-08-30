@@ -12,6 +12,10 @@ async function api(path, options = {}) {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type === 'GET_LATEST_WEBMCP_SCAN') {
+    chrome.storage.session.get('agentbridgeLastWebMcpScan').then(data => sendResponse({ ok: true, result: data.agentbridgeLastWebMcpScan || null }));
+    return true;
+  }
   if (message.type !== 'AGENTBRIDGE_API') return;
   api(message.path, message.options).then(body => sendResponse({ ok: true, body }), error => sendResponse({ ok: false, error: error.message }));
   return true;

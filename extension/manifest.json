@@ -4,12 +4,12 @@
   "version": "0.1.0",
   "description": "Merchant controls for AgentBridge-enabled websites.",
   "action": { "default_title": "AgentBridge", "default_popup": "popup.html" },
-  "permissions": ["activeTab", "tabs", "scripting"],
+  "permissions": ["activeTab", "tabs", "scripting", "storage"],
   "host_permissions": ["http://localhost:3000/*", "http://localhost:8080/*", "http://localhost:8091/*", "http://localhost:8092/*"],
-  "optional_host_permissions": ["https://*/*"],
+  "optional_host_permissions": ["https://agentbridge-production-dce4.up.railway.app/*"],
   "background": { "service_worker": "background.js", "type": "classic" },
   "content_scripts": [{
-    "matches": ["http://localhost:3000/*", "http://localhost:8080/*", "http://localhost:8091/*", "http://localhost:8092/*"],
+    "matches": ["http://localhost:3000/*", "http://localhost:8080/*", "http://localhost:8091/*", "http://localhost:8092/*", "https://agentbridge-production-dce4.up.railway.app/*"],
     "js": ["content.js"],
     "run_at": "document_idle"
   }]

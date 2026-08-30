@@ -11,6 +11,7 @@ const config = require('./config');
 
 const port = config.port;
 const appRoot = path.join(__dirname, '..', 'agentbridge-app');
+const adminRoot = path.join(__dirname, '..', 'admin-app');
 const demoStoreRoot = path.join(__dirname, '..', 'demo-site');
 const fixtureRoot = path.join(__dirname, '..', 'test-sites');
 function json(res, status, body) { res.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8' }); res.end(JSON.stringify(body)); }
@@ -66,6 +67,8 @@ function serveFile(res, root, requested) {
 function serveStatic(req, res) {
   const requested = decodeURIComponent(req.url.split('?')[0]);
   if (requested === '/agentbridge-config.js') { res.writeHead(200, { 'Content-Type': 'application/javascript; charset=utf-8', 'Cache-Control': 'no-store' }); return res.end('window.AgentBridgeConfig=' + JSON.stringify({ apiBase: config.apiBaseUrl, publicBase: config.publicBaseUrl, webmcpOriginTrialToken: config.webmcpOriginTrialToken }) + ';if(window.AgentBridgeConfig.webmcpOriginTrialToken){const m=document.createElement("meta");m.httpEquiv="origin-trial";m.content=window.AgentBridgeConfig.webmcpOriginTrialToken;document.head.appendChild(m);}'); }
+  if (requested === '/admin' || requested === '/admin/') return serveFile(res, adminRoot, '/index.html');
+  if (requested.startsWith('/admin/')) return serveFile(res, adminRoot, requested.slice('/admin'.length));
   if (requested === '/store' || requested === '/store/') return serveFile(res, demoStoreRoot, '/index.html');
   if (requested.startsWith('/store/')) return serveFile(res, demoStoreRoot, requested.slice('/store'.length));
   if (requested === '/restaurant' || requested === '/restaurant/') return serveFile(res, fixtureRoot, '/restaurant/index.html');
