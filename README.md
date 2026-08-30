@@ -67,7 +67,7 @@ Open:
 
 Register a site, copy the generated verification tag into its page, verify it, analyze, configure adapters where requested, approve tools, and enable Agent Access. Use `npm run demo:reset` only for local demo resets.
 
-Environment variables are documented in [.env.example](.env.example). The service supports persistent storage through `AGENTBRIDGE_DATA_DIR`.
+Environment variables are documented in [.env.example](.env.example). Local development keeps JSON persistence through `AGENTBRIDGE_DATA_DIR`.
 
 ## Chrome extension
 
@@ -79,7 +79,7 @@ Use a Chrome profile with `chrome://flags/#enable-webmcp-testing` enabled for lo
 
 ## Deployment
 
-The included [render.yaml](render.yaml) deploys one Node service, serves the dashboard and all demos at HTTPS paths, and uses a mounted disk for JSON persistence. Set `PUBLIC_BASE_URL`, `API_BASE_URL`, and `CORS_ORIGINS` to the deployed URL. Keep `DEMO_RESET_ENABLED=false` publicly. If an origin-trial token is issued, set `WEBMCP_ORIGIN_TRIAL_TOKEN`; it is rendered into demo pages without committing a token.
+The included [render.yaml](render.yaml) targets Render's free web-service tier: one Node service serves the dashboard and all demos at HTTPS paths, with no paid disk. Set `PUBLIC_BASE_URL`, `API_BASE_URL`, and `CORS_ORIGINS` to the deployed URL. Render storage is ephemeral, so `AUTO_SEED_DEMO=true` seeds the three verified, configured demo sites only when an instance starts with no data. Existing state is never overwritten while that instance is running. Keep `DEMO_RESET_ENABLED=false` publicly. A production version should use durable storage. If an origin-trial token is issued, set `WEBMCP_ORIGIN_TRIAL_TOKEN`; it is rendered into demo pages without committing a token.
 
 ## Competition demo in 30 seconds
 
@@ -93,7 +93,7 @@ The included [render.yaml](render.yaml) deploys one Node service, serves the das
 
 ## Known limitations
 
-- This MVP uses JSON persistence; Render’s persistent disk is required for recording reliability.
+- This MVP uses JSON persistence. Render free-tier state can reset after redeploy/restart; the competition seed restores a clean deterministic demo state, while production should use durable persistence.
 - Public reset is disabled by default.
 - Arbitrary website detection is never treated as an executable integration.
 - Complete Chrome page-level ON/OFF lifecycle proof remains pending the documented local flag/origin-trial environment; in-app-browser read-tool evidence is recorded separately.

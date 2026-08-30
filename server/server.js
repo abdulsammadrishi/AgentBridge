@@ -6,6 +6,7 @@ const store = require('./services/store');
 const { analyzeWebsite, fetchHtml: fetchSafeHtml } = require('./services/analyzer');
 const adapterRegistry = require('./services/adapters/registry');
 const { resetDemo } = require('./services/demoReset');
+const { seedDemoIfEmpty } = require('./services/demoSeed');
 const config = require('./config');
 
 const port = config.port;
@@ -162,4 +163,4 @@ const server = http.createServer(async (req, res) => {
     if (!serveStatic(req, res)) json(res, 404, { error: 'Not found.' });
   } catch (error) { console.error(error); json(res, 500, { error: 'Something went wrong.' }); }
 });
-server.listen(port, () => console.log('AgentBridge running at http://localhost:' + port));
+server.listen(port, () => { const seed = seedDemoIfEmpty(); console.log('AgentBridge running at ' + (config.publicBaseUrl || 'http://localhost:' + port) + (seed.seeded ? ' · demo data seeded' : '')); });
