@@ -163,4 +163,5 @@ const server = http.createServer(async (req, res) => {
     if (!serveStatic(req, res)) json(res, 404, { error: 'Not found.' });
   } catch (error) { console.error(error); json(res, 500, { error: 'Something went wrong.' }); }
 });
-server.listen(port, () => { const seed = seedDemoIfEmpty(); console.log('AgentBridge running at ' + (config.publicBaseUrl || 'http://localhost:' + port) + (seed.seeded ? ' · demo data seeded' : '')); });
+const startupSeed = seedDemoIfEmpty();
+server.listen(port, config.host, () => { console.log('AgentBridge running at ' + (config.publicBaseUrl || 'http://localhost:' + port) + (startupSeed.seeded ? ' · demo data seeded' : '')); });

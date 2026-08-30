@@ -11,5 +11,12 @@ function demoSites() {
     { id: 'demo-services', url: base + '/services/', businessName: 'Clearline Studio', businessType: 'Services', verified: true, verificationToken: 'demo-services-verification-token', agentAccessEnabled: true, capabilities: [capability('view-services', 'View services', 'READ', 'low', 'get_services', 'configuration_required', ['Services fixture detected'], 0.8), capability('request-quote', 'Contact / request quote', 'ACTION', 'medium', 'request_quote', 'configuration_required', ['Request-quote fixture detected'], 0.82)], tools: tools([['get_services', true, 'low'], ['request_quote', true, 'medium', true]]), adapters: { 'view-services': { adapterId: 'static-data', config: { services: ['Brand strategy', 'Web design', 'Product design'] }, configuredAt: new Date().toISOString() }, 'request-quote': { adapterId: 'form-action', config: { fields: ['service', 'name', 'email', 'message'] }, configuredAt: new Date().toISOString() } }, activity: [], createdAt: new Date().toISOString() }
   ];
 }
-function seedDemoIfEmpty() { if (!config.autoSeedDemo || store.list().length) return { seeded: false }; const websites = demoSites(); store.replace(websites); return { seeded: true, count: websites.length }; }
+function seedDemoIfEmpty() {
+  if (!config.autoSeedDemo || store.list().length) return { seeded: false };
+  // A public origin is required so the seeded site records never point at localhost.
+  if (!config.publicBaseUrl) return { seeded: false, reason: 'PUBLIC_BASE_URL is required for demo auto-seeding.' };
+  const websites = demoSites();
+  store.replace(websites);
+  return { seeded: true, count: websites.length };
+}
 module.exports = { seedDemoIfEmpty, demoSites };

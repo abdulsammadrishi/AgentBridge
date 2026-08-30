@@ -79,7 +79,17 @@ Use a Chrome profile with `chrome://flags/#enable-webmcp-testing` enabled for lo
 
 ## Deployment
 
-The included [render.yaml](render.yaml) targets Render's free web-service tier: one Node service serves the dashboard and all demos at HTTPS paths, with no paid disk. Set `PUBLIC_BASE_URL`, `API_BASE_URL`, and `CORS_ORIGINS` to the deployed URL. Render storage is ephemeral, so `AUTO_SEED_DEMO=true` seeds the three verified, configured demo sites only when an instance starts with no data. Existing state is never overwritten while that instance is running. Keep `DEMO_RESET_ENABLED=false` publicly. A production version should use durable storage. If an origin-trial token is issued, set `WEBMCP_ORIGIN_TRIAL_TOKEN`; it is rendered into demo pages without committing a token.
+Railway is the recommended competition deployment: [railway.json](railway.json) deploys one Node service, runs `npm run check` during build, starts with `npm start`, and checks `/` for health. The server binds to `0.0.0.0` and honors Railway’s injected `PORT`.
+
+After Railway creates an HTTPS public domain, set these service variables and redeploy:
+
+- `PUBLIC_BASE_URL=https://your-railway-domain`
+- `API_BASE_URL=https://your-railway-domain`
+- `CORS_ORIGINS=https://your-railway-domain`
+- `AUTO_SEED_DEMO=true`
+- `DEMO_RESET_ENABLED=false`
+
+Railway’s service filesystem is ephemeral. On a clean startup, `AUTO_SEED_DEMO=true` deterministically creates the three verified, configured demo sites only when `PUBLIC_BASE_URL` is set and no JSON state exists. This prevents seed records from ever pointing to `localhost`; it also never overwrites state already present in the running environment. The included [render.yaml](render.yaml) remains a reference configuration, but Railway is the recommended path. A production version should use durable storage. If an origin-trial token is issued, set `WEBMCP_ORIGIN_TRIAL_TOKEN`; it is rendered into demo pages without committing a token.
 
 ## Competition demo in 30 seconds
 
@@ -93,7 +103,7 @@ The included [render.yaml](render.yaml) targets Render's free web-service tier: 
 
 ## Known limitations
 
-- This MVP uses JSON persistence. Render free-tier state can reset after redeploy/restart; the competition seed restores a clean deterministic demo state, while production should use durable persistence.
+- This MVP uses JSON persistence. Railway (and the Render reference configuration) can reset state after redeploy/restart; the competition seed restores a clean deterministic demo state, while production should use durable persistence.
 - Public reset is disabled by default.
 - Arbitrary website detection is never treated as an executable integration.
 - Complete Chrome page-level ON/OFF lifecycle proof remains pending the documented local flag/origin-trial environment; in-app-browser read-tool evidence is recorded separately.
