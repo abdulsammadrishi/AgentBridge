@@ -14,11 +14,16 @@
 
   function landing() {
     root.replaceChildren(getTemplate('#landing-template'));
-    root.querySelector('[data-action="start"]').addEventListener('click', register);
+    root.querySelector('[data-action="start"]').addEventListener('click', () => register());
   }
-  function register(prefillUrl = '') {
+  function register(prefillUrl = '', freshOnboarding = false) {
     root.replaceChildren(getTemplate('#register-template'));
     root.querySelector('[name="url"]').value = prefillUrl;
+    if (freshOnboarding) {
+      const form = root.querySelector('#website-form'), businessName = form.elements.businessName, businessType = form.elements.businessType;
+      const clearFreshFields = () => { businessName.value = ''; businessType.value = ''; };
+      form.autocomplete = 'off'; businessName.autocomplete = 'off'; clearFreshFields(); requestAnimationFrame(clearFreshFields);
+    }
     root.querySelector('#website-form').addEventListener('submit', async event => {
       event.preventDefault();
       const form = new FormData(event.currentTarget), error = root.querySelector('#form-error');
@@ -35,7 +40,7 @@
     const tag = '<meta name="agentbridge-verification" content="' + website.verificationToken + '">';
     root.querySelector('#verification-tag').textContent = tag;
     root.querySelector('[data-action="copy-token"]').addEventListener('click', async event => { await navigator.clipboard?.writeText(tag); event.currentTarget.textContent = 'Copied'; });
-    root.querySelector('[data-action="back-register"]').addEventListener('click', register);
+    root.querySelector('[data-action="back-register"]').addEventListener('click', () => register());
     root.querySelector('[data-action="verify"]').addEventListener('click', async event => {
       const error = root.querySelector('#verify-error'); event.currentTarget.disabled = true; event.currentTarget.textContent = 'Checking…';
       try {
@@ -95,7 +100,7 @@
     };
     if (params.get('freshOnboarding') === '1') {
       history.replaceState(null, '', location.pathname);
-      return register(normalizeOnboardingUrl(onboardingUrl));
+      return register(normalizeOnboardingUrl(onboardingUrl), true);
     }
     if (onboardingUrl) {
       const normalized = normalizeOnboardingUrl(onboardingUrl);
