@@ -15,5 +15,8 @@ assert.equal(registry.get('form-action').validate({ fields: [] }), false);
 assert.equal(registry.get('static-data').validate({ items: ['Soup'] }), true);
 assert.equal(registry.get('missing-adapter'), undefined);
 assert.deepEqual(Object.keys(registry.activeTools({ ...configured, agentAccessEnabled: false })), []);
+assert.deepEqual(Object.keys(registry.activeTools({ ...configured, adminStatus: 'DEACTIVATED' })), []);
+assert.deepEqual(Object.keys(registry.activeTools({ ...configured, adminStatus: 'ACTIVE' })), ['get_menu', 'request_quote', 'search_products']);
+assert.deepEqual(Object.keys(registry.activeTools(configured)), ['get_menu', 'request_quote', 'search_products']);
 assert.equal(registry.get('form-action').execute({ tool: 'request_quote', config: { fields: ['email'] } }).confirmationRequired, true);
 console.log('Adapter registry tests passed: activation gates, validation, confirmation, and disabled policy.');

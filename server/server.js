@@ -19,7 +19,8 @@ function readBody(req) { return new Promise((resolve, reject) => { let body = ''
 // There is intentionally no multi-user auth in this competition MVP, so the
 // workspace response includes its token for the verification step UI. A real
 // authenticated product would only reveal this to the authorized merchant.
-function publicSite(site) { return site ? { ...site, adapterStates: (site.capabilities || []).map(capability => adapterView(site, capability)) } : null; }
+function adminStatus(site) { return site?.adminStatus === 'DEACTIVATED' ? 'DEACTIVATED' : 'ACTIVE'; }
+function publicSite(site) { return site ? { ...site, adminStatus: adminStatus(site), adapterStates: (site.capabilities || []).map(capability => adapterView(site, capability)) } : null; }
 function siteOrigin(value) { try { const url = new URL(value); return url.origin; } catch { return null; } }
 function siteHost(value) { try { return new URL(value).hostname.toLowerCase(); } catch { return null; } }
 function sitePath(value) { try { const pathname = new URL(value).pathname.replace(/\/+$/, ''); return pathname || '/'; } catch { return null; } }
@@ -34,7 +35,8 @@ function matchesSiteUrl(site, currentUrl) {
 function matchingSite(currentUrl) { return store.list().filter(site => matchesSiteUrl(site, currentUrl)).sort((a, b) => sitePath(b.url).length - sitePath(a.url).length)[0]; }
 function extensionSite(site) {
   if (!site) return { website: null };
-  return { website: publicSite(site), policy: { agentAccessEnabled: Boolean(site.agentAccessEnabled), tools: site.tools || {} } };
+  const status = adminStatus(site);
+  return { website: publicSite(site), policy: { adminStatus: status, agentAccessEnabled: Boolean(site.agentAccessEnabled), effectiveAgentAccessEnabled: status === 'ACTIVE' && Boolean(site.agentAccessEnabled), tools: site.tools || {} } };
 }
 function adapterView(site, capability) { const resolved = adapterRegistry.status(site, capability), saved = adapterRegistry.configured(site, capability); return { capabilityId: capability.id, tool: capability.suggestedToolName, status: resolved.status, adapter: resolved.adapter ? { id: resolved.adapter.id, requiresConfig: resolved.adapter.requiresConfig, requiresConfirmation: resolved.adapter.requiresConfirmation, risk: resolved.adapter.risk } : null, config: saved?.config || null, availableAdapters: adapterRegistry.available(capability).map(adapter => ({ id: adapter.id, requiresConfig: adapter.requiresConfig, requiresConfirmation: adapter.requiresConfirmation })) }; }
 function validUrl(value) { try { const url = new URL(value); return (url.protocol === 'http:' || url.protocol === 'https:') && !url.username && !url.password; } catch { return false; } }
@@ -96,7 +98,8 @@ const server = http.createServer(async (req, res) => {
       const currentUrl = requestUrl.searchParams.get('url');
       const site = matchingSite(currentUrl);
       if (!site || !site.verified) return json(res, 200, { connected: false, policy: null });
-      return json(res, 200, { connected: true, website: { id: site.id, url: site.url }, policy: { agentAccessEnabled: Boolean(site.agentAccessEnabled), tools: adapterRegistry.activeTools(site) } });
+      const status = adminStatus(site);
+      return json(res, 200, { connected: true, website: { id: site.id, url: site.url }, policy: { adminStatus: status, agentAccessEnabled: Boolean(site.agentAccessEnabled), effectiveAgentAccessEnabled: status === 'ACTIVE' && Boolean(site.agentAccessEnabled), tools: adapterRegistry.activeTools(site) } });
     }
     if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'runtime' && parts[2] === 'activity') {
       const body = await readBody(req), site = store.get(body.websiteId);
@@ -127,12 +130,13 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && req.url === '/api/websites') {
       const body = await readBody(req);
       if (!validUrl(body.url) || !body.businessName || !['E-commerce', 'Restaurant', 'Services', 'Other'].includes(body.businessType)) return json(res, 400, { error: 'Enter a valid http(s) website URL, business name, and business type.' });
-      const site = { id: crypto.randomUUID(), url: body.url, businessName: body.businessName.trim(), businessType: body.businessType, verified: false, verificationToken: crypto.randomBytes(18).toString('hex'), agentAccessEnabled: true, tools: defaultTools(), capabilities: [], adapters: {}, activity: [], createdAt: new Date().toISOString() };
+      const site = { id: crypto.randomUUID(), url: body.url, businessName: body.businessName.trim(), businessType: body.businessType, verified: false, verificationToken: crypto.randomBytes(18).toString('hex'), adminStatus: 'ACTIVE', agentAccessEnabled: true, tools: defaultTools(), capabilities: [], adapters: {}, activity: [], createdAt: new Date().toISOString() };
       store.create(site); return json(res, 201, publicSite(site));
     }
     if (parts[0] === 'api' && parts[1] === 'websites' && parts[2]) {
       const site = store.get(parts[2]); if (!site) return json(res, 404, { error: 'Website not found.' });
       if (req.method === 'GET' && !parts[3]) return json(res, 200, publicSite(site));
+      if (req.method === 'PATCH' && parts[3] === 'admin-status') { const body = await readBody(req), status = body.adminStatus; if (!['ACTIVE', 'DEACTIVATED'].includes(status)) return json(res, 400, { error: 'adminStatus must be ACTIVE or DEACTIVATED.' }); const updated = store.update(site.id, { adminStatus: status, activity: addActivity(site, { type: 'admin_status', label: status === 'ACTIVE' ? 'Website reactivated by AgentBridge operator' : 'Website deactivated by AgentBridge operator', outcome: status === 'ACTIVE' ? 'allowed' : 'denied' }) }); return json(res, 200, publicSite(updated)); }
       if (req.method === 'GET' && parts[3] === 'adapters') return json(res, 200, { adapters: (site.capabilities || []).map(capability => adapterView(site, capability)) });
       if (parts[3] === 'capabilities' && parts[4] && parts[5] === 'adapter') {
         const capability = (site.capabilities || []).find(item => item.id === parts[4]); if (!capability) return json(res, 404, { error: 'Capability not detected.' });

@@ -21,12 +21,25 @@
       tbody.innerHTML = websites.map(site => {
         const capabilities = (site.capabilities || []).length;
         const approved = Object.values(site.tools || {}).filter(tool => tool.enabled).length;
-        return '<tr><td><strong>' + esc(domain(site.url)) + '</strong><small>' + esc(site.url) + '</small></td><td>' + esc(site.businessType || '—') + '</td><td>' + badge(site.verified, 'Yes', 'No') + '</td><td>' + badge(site.agentAccessEnabled, 'ON', 'OFF') + '</td><td>' + capabilities + ' / ' + approved + '</td><td>' + date(site.createdAt) + '</td><td>' + date(site.updatedAt || site.createdAt) + '</td></tr>';
-      }).join('') || '<tr><td colspan="7" class="empty">No website records.</td></tr>';
+        const active = site.adminStatus !== 'DEACTIVATED';
+        return '<tr class="' + (active ? '' : 'deactivated') + '"><td><strong>' + esc(domain(site.url)) + '</strong><small>' + esc(site.url) + '</small></td><td>' + esc(site.businessType || '—') + '</td><td>' + badge(site.verified, 'Yes', 'No') + '</td><td>' + badge(site.agentAccessEnabled, 'ON', 'OFF') + '</td><td>' + capabilities + ' / ' + approved + '</td><td>' + date(site.createdAt) + '</td><td>' + date(site.updatedAt || site.createdAt) + '</td><td class="admin-control"><span class="admin-status ' + (active ? 'active' : 'inactive') + '">' + (active ? 'ACTIVE' : 'DEACTIVATED') + '</span><button class="' + (active ? 'danger' : 'secondary') + '" data-admin-site="' + esc(site.id) + '" data-admin-status="' + (active ? 'DEACTIVATED' : 'ACTIVE') + '">' + (active ? 'Deactivate' : 'Reactivate') + '</button></td></tr>';
+      }).join('') || '<tr><td colspan="8" class="empty">No website records.</td></tr>';
       status.textContent = websites.length + ' website record' + (websites.length === 1 ? '' : 's') + '.';
     } catch (error) { status.textContent = error.message; tbody.innerHTML = ''; }
   }
+  async function changeAdminStatus(button) {
+    const next = button.dataset.adminStatus;
+    if (next === 'DEACTIVATED' && !confirm('Deactivate this website at the AgentBridge platform level? Merchant Agent Access and saved website data will be preserved, but managed WebMCP tools will be suspended.')) return;
+    button.disabled = true;
+    try {
+      const response = await fetch('/api/websites/' + encodeURIComponent(button.dataset.adminSite) + '/admin-status', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminStatus: next }) });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.error || 'Unable to update administrative status.');
+      await loadWebsites();
+    } catch (error) { status.textContent = error.message; button.disabled = false; }
+  }
   document.querySelector('#refresh').addEventListener('click', loadWebsites);
+  tbody.addEventListener('click', event => { const button = event.target.closest('[data-admin-site]'); if (button) changeAdminStatus(button); });
   document.querySelector('#scanner-form').addEventListener('submit', event => {
     event.preventDefault();
     const url = document.querySelector('#scanner-url').value.trim();
