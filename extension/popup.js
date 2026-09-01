@@ -26,9 +26,14 @@ async function scanWebMcp() {
   button.disabled = true; output.textContent = 'Scanning active page…';
   try {
     const [{ result }] = await chrome.scripting.executeScript({ target: { tabId: currentTab.id }, world: 'MAIN', func: async () => {
-      const testing = navigator.modelContextTesting;
-      if (!testing || typeof testing.listTools !== 'function') return { available: false, active: false, tools: [] };
-      const listed = await testing.listTools();
+      const testing = navigator.modelContextTesting, modelContext = document.modelContext;
+      const discover = typeof testing?.listTools === 'function'
+        ? () => testing.listTools()
+        : typeof modelContext?.getTools === 'function'
+          ? () => modelContext.getTools()
+          : null;
+      if (!discover) return { available: false, active: false, tools: [] };
+      const listed = await discover();
       const tools = (Array.isArray(listed) ? listed : []).map(tool => typeof tool === 'string' ? tool : tool?.name || tool?.title || 'Unnamed tool');
       return { available: true, active: tools.length > 0, tools };
     } });
