@@ -9,7 +9,7 @@ function error(message) { app.insertAdjacentHTML('beforeend', '<p class="error">
 const scanButton = () => '<button id="scan-webmcp">SCAN WEBMCP TOOLS</button><p class="subtle" id="scan-result"></p>';
 const scanSummary = result => !result?.available ? 'WebMCP testing API unavailable.' : result.active ? 'WebMCP ACTIVE: ' + result.tools.join(', ') : 'WebMCP NOT DETECTED.';
 const adminOrigins = () => new Set([new URL(AGENTBRIDGE_API_BASE).origin, 'http://localhost:3000', 'http://localhost:8080', 'http://localhost:8091', 'http://localhost:8092']);
-const onboardingUrl = tabUrl => { const url = new URL(tabUrl); return url.origin; };
+const onboardingUrl = tabUrl => { const url = new URL(tabUrl); url.hash = ''; return url.href; };
 function toolsMarkup(tools) { return Object.entries(tools || {}).map(([name, setting]) => '<li><label><input type="checkbox" data-tool="' + esc(name) + '" ' + (setting.enabled ? 'checked' : '') + '> ' + esc(name) + '</label><span class="tool-state ' + (setting.enabled ? 'allow' : 'deny') + '">' + (setting.enabled ? 'APPROVED' : 'DENIED') + '</span></li>').join(''); }
 async function renderConnected(result) {
   currentSite = result.website; const webmcp = await runtime(); const active = Boolean(result.policy.agentAccessEnabled);

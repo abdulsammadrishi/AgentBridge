@@ -37,17 +37,29 @@
     root.replaceChildren(getTemplate('#verify-template'));
     const website = state.website;
     root.querySelector('[data-site-host]').textContent = host(website.url);
-    const tag = '<meta name="agentbridge-verification" content="' + website.verificationToken + '">';
+    const tag = '<meta name="agentbridge-verification" content="' + website.verificationToken + '" />';
     root.querySelector('#verification-tag').textContent = tag;
-    root.querySelector('[data-action="copy-token"]').addEventListener('click', async event => { await navigator.clipboard?.writeText(tag); event.currentTarget.textContent = 'Copied'; });
+    root.querySelector('[data-action="copy-token"]').addEventListener('click', async event => {
+      const button = event.currentTarget, error = root.querySelector('#verify-error');
+      try { await navigator.clipboard.writeText(tag); button.textContent = 'Copied'; }
+      catch { error.textContent = 'Could not copy the tag. Select and copy it manually.'; }
+    });
     root.querySelector('[data-action="back-register"]').addEventListener('click', () => register());
     root.querySelector('[data-action="verify"]').addEventListener('click', async event => {
-      const error = root.querySelector('#verify-error'); event.currentTarget.disabled = true; event.currentTarget.textContent = 'Checking…';
+      // currentTarget is cleared after dispatch; retain the element across await.
+      const button = event.currentTarget, error = root.querySelector('#verify-error');
+      button.disabled = true; button.textContent = 'Checking…'; error.textContent = '';
       try {
-        const result = await api('/api/websites/' + website.id + '/verify', { method: 'POST' });
+        const result = await api('/api/websites/' + website.id + '/verify', { method: 'POST', signal: AbortSignal.timeout(15000) });
+        if (!button.isConnected) return;
         storeCurrent(result.website);
-        if (result.verified) dashboard(); else { error.textContent = 'Website not verified. Add the exact meta tag, save, and try again.'; event.currentTarget.disabled = false; event.currentTarget.innerHTML = 'Check verification <b>→</b>'; }
-      } catch (err) { error.textContent = err.message; event.currentTarget.disabled = false; event.currentTarget.innerHTML = 'Check verification <b>→</b>'; }
+        if (result.verified) dashboard();
+        else error.textContent = result.message || 'Website not verified. Add the exact meta tag, save, and try again.';
+      } catch (err) {
+        error.textContent = ['TimeoutError', 'AbortError'].includes(err.name) ? 'Verification timed out. Check your connection and try again.' : err.message;
+      } finally {
+        button.disabled = false; button.innerHTML = 'Check verification <b>→</b>';
+      }
     });
   }
   function dashboard() {
@@ -95,7 +107,8 @@
       try {
         const url = new URL(value);
         if (!['http:', 'https:'].includes(url.protocol)) throw new Error('Unsupported protocol');
-        return url.origin;
+        url.hash = '';
+        return url.href;
       } catch { return ''; }
     };
     if (params.get('freshOnboarding') === '1') {

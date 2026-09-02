@@ -8,6 +8,7 @@ const adapterRegistry = require('./services/adapters/registry');
 const { resetDemo } = require('./services/demoReset');
 const { seedDemoIfEmpty } = require('./services/demoSeed');
 const config = require('./config');
+const { metaMatches } = require('./services/verification');
 
 const port = config.port;
 const appRoot = path.join(__dirname, '..', 'agentbridge-app');
@@ -42,14 +43,6 @@ function adapterView(site, capability) { const resolved = adapterRegistry.status
 function validUrl(value) { try { const url = new URL(value); return (url.protocol === 'http:' || url.protocol === 'https:') && !url.username && !url.password; } catch { return false; } }
 function defaultTools() { return { search_products: { enabled: true, risk: 'low' }, get_product: { enabled: true, risk: 'low' }, check_inventory: { enabled: true, risk: 'low' }, add_to_cart: { enabled: false, risk: 'medium' }, place_order: { enabled: false, risk: 'high', requiresConfirmation: true } }; }
 function addActivity(site, entry) { return [...(site.activity || []), { id: crypto.randomUUID(), timestamp: new Date().toISOString(), ...entry }].slice(-50); }
-function metaMatches(html, token) {
-  const tags = html.match(/<meta\b[^>]*>/gi) || [];
-  return tags.some(tag => {
-    const name = /\bname\s*=\s*["']?agentbridge-verification["']?/i.test(tag);
-    const content = new RegExp('\\bcontent\\s*=\\s*["\']?' + token.replace(/[.*+?^$()|[\]\\]/g, '\\$&') + '["\']?', 'i').test(tag);
-    return name && content;
-  });
-}
 async function fetchHtml(url) {
   const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 7000);
   try {
@@ -157,7 +150,7 @@ const server = http.createServer(async (req, res) => {
         }
       }
       if (req.method === 'POST' && parts[3] === 'verify') {
-        try { const { html } = await fetchSafeHtml(site.url); const verified = metaMatches(html, site.verificationToken); const updated = store.update(site.id, { verified, activity: addActivity(site, { type: 'verification', label: verified ? 'Website ownership verified' : 'Website verification failed', outcome: verified ? 'allowed' : 'denied' }) }); return json(res, 200, { verified, website: publicSite(updated), message: verified ? 'Website ownership verified.' : 'Verification tag not found yet.' }); }
+        try { const { html } = await fetchSafeHtml(site.url); const verified = metaMatches(html, site.verificationToken); const updated = store.update(site.id, { verified, activity: addActivity(site, { type: 'verification', label: verified ? 'Website ownership verified' : 'Website verification failed', outcome: verified ? 'allowed' : 'denied' }) }); return json(res, 200, { verified, website: publicSite(updated), message: verified ? 'Website ownership verified.' : 'Expected exactly one matching agentbridge-verification meta tag inside <head> at ' + site.url + '. Replace the existing tag with the generated tag, publish the page, and retry.' }); }
         catch (error) { return json(res, 422, { error: 'Could not fetch this website. Check the URL and try again.' }); }
       }
       if (req.method === 'POST' && parts[3] === 'analyze') {
