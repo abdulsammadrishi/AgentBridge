@@ -35,6 +35,8 @@
   }
   function verify() {
     root.replaceChildren(getTemplate('#verify-template'));
+    const portalHost = new URL(window.AgentBridgeConfig?.publicBase || location.origin).hostname;
+    if (!['localhost', '127.0.0.1', '[::1]'].includes(portalHost)) root.querySelector('[data-local-demo-tip]').remove();
     const website = state.website;
     root.querySelector('[data-site-host]').textContent = host(website.url);
     const tag = '<meta name="agentbridge-verification" content="' + website.verificationToken + '" />';
